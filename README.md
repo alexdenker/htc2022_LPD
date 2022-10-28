@@ -23,6 +23,12 @@ The networks weights are fairly small (~10MB) per difficulty level so we store t
 python main.py /path_to_input_folder /path_to_ouput_folder difficulty_level
 ```
 
+We have uploaded a few limited-angle measurements for the 30° case as an example: 
+
+```
+python main.py examples/limited_angle_30/ output_images/ 7
+```
+
 Currently we can handle both files in MATLAB 5.0 and MATLAB 7.3 format.
 
 
@@ -116,4 +122,4 @@ We evaluate the LPD model w.r.t. the [score function](https://www.fips.fi/HTCrul
 
 Team University of Bremen, Center of Industrial Mathematics (ZeTeM): 
 
-- Alexander Denker, Clemens Arndt, Judith Nickel, Johannes Leuschner, Sören Dittmer
+- Alexander Denker, Clemens Arndt, Judith Nickel, Johannes Leuschner, Janek Gödeke, Sören Dittmer
