@@ -62,6 +62,7 @@ def load_image(path):
         print("File could not be loaded using scipy.io.loadmat. Try mat73 instead.")
         ta_sinogram = mat73.loadmat(path)
 
+    # # "CtDataLimited" instead of "CtDataFull"
     sinogram = ta_sinogram["CtDataLimited"]["sinogram"]
     angles = ta_sinogram["CtDataLimited"]["parameters"]["angles"]
 
@@ -107,9 +108,10 @@ def main(inputFolder, outputFolder, categoryNbr):
     for f in os.listdir(inputFolder):
         print(f)
         sinogram, angles = load_image(os.path.join(inputFolder, f))
-        print(angles)
+
         y = torch.from_numpy(sinogram).unsqueeze(0).unsqueeze(0).float().to(device)
         
+
         """
         with torch.no_grad():
             x_hat = torch.sigmoid(model(y))

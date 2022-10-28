@@ -1,5 +1,7 @@
 # Submission to the Helsinki Tomography Challenge 2022
 
+In this submission we use a modified learned-primal dual method pre-trained on synthetic phantoms and fine-tuned on the available challenge data.
+
 # Table of contents
 1. [Usage](#usage)
 2. [Method](#method)
@@ -11,13 +13,13 @@
 
 ## Usage
 
-We provided the `enviroment.yml` file to restore the conda enviroment used for the submission. You can create the enviroment using the following command:
+We provide the `enviroment.yml` file to restore the conda enviroment used for the submission. You can create the enviroment using the following command:
 
 ```
 conda env create -f environment.yml
 ```
 
-The networks weights are fairly small (~10MB) per difficulty level so we store them directly in the repository. We created a script `main.py` to reconstruct phantoms from limited-angle measurements: 
+The network weights are fairly small (~10MB per difficulty level), so we store them directly in the repository. We created a script `main.py` to reconstruct phantoms from limited-angle measurements: 
 
 ```
 python main.py /path_to_input_folder /path_to_ouput_folder difficulty_level
@@ -29,33 +31,33 @@ We have uploaded a few limited-angle measurements for the 30° case as an exampl
 python main.py examples/limited_angle_30/ output_images/ 7
 ```
 
-Currently we can handle both files in MATLAB 5.0 and MATLAB 7.3 format.
+Currently we can handle both files in MATLAB 5.0 and MATLAB 7.3 format. We tested the script using CUDA version 11.2 on Ubuntu. 
 
 
 ## Method
 
-We tested a modified [learned primal-dual](https://arxiv.org/abs/1707.06474) (LPD) model trained only on synthetic training data. The learned primal-dual model is a type of learned iterative method which integrates the forward operator and its adjoint directly into the network architecture. Additionaly it mimics the traditional primal-dual algorithm but uses neural network components instead of the proximal mappings. Empirical studies have also shown that models of this type are more data efficient (see for example [Baguer et. al. (2020)](https://iopscience.iop.org/article/10.1088/1361-6420/aba415)). 
+We implemented a modified [learned primal-dual](https://arxiv.org/abs/1707.06474) (LPD) model trained using synthetic training data. The LPD model is a type of learned iterative method which integrates the forward operator and its adjoint directly into the network architecture. It mimics the traditional primal-dual algorithm but uses neural network components instead of the proximal mappings. Empirical studies have also shown that models of this type are more data efficient (see for example [Baguer et. al. (2020)](https://iopscience.iop.org/article/10.1088/1361-6420/aba415)). 
 
-However, the learned primal-dual architecture is not specialized to limited-angle tomography. We are aware that there exist deep learning methods that are more adapted to limited-angle CT, for example the work by [Bubba et. al. (2018)](https://arxiv.org/abs/1811.04602). Nonetheless, we wanted to give it a shot. 
+However, the learned primal-dual architecture is not specialized to limited-angle tomography. We are aware that there exist deep learning methods that are more adapted to limited-angle CT, for example the work by [Bubba et. al. (2018)](https://arxiv.org/abs/1811.04602). Nonetheless, we wanted to give it a shot. Our implementation follows the [Dival](https://github.com/jleuschn/dival) libary.
 
-Important for our approach is the generation of synthetic training phantoms. Especially for limited-angle CT some parts, i.e. edges with specific orientations, cannot be reconstructed. So our deep learning approach has to predict these missing image parts. In order for this inpainting to work reliably, the training data should match the challenge data. We used four different methods to create synthetic phantoms and used our numerical forward operator to simulate limited-angle measurements. 
+Important for our approach is the generation of synthetic training phantoms and the simulation of corresponding measurement data. Especially for limited-angle CT some parts, i.e. edges with specific orientations, cannot be reconstructed. So our deep learning approach has to predict these missing image parts. In order for this inpainting to work reliably, the training data should match the challenge data. We used four different methods to create synthetic phantoms and used our forward operator to simulate limited-angle measurements. 
 
 ### Training
 
-The LPD model was trained in two phases. The first phases uses only the synthentic phantoms with corresponding simulated measurements. Here we train for about 40.000 steps each with a batch of 6 randomly generated phantoms. The network is trained end-to-end with the binary cross entropy loss function. We start with a learning rate of 1e-3 and use a StepLR scheduler to reduce the learning rate every 4000 steps by a factor of 0.75. After this pre-training stage we use the challenge phantoms for fine-tuning. In particular we train for 2000 steps with randomly rotated versions of the challenge phantoms using a small learning rate of 1e-5.
+The LPD model was trained in two phases. The first phases uses only the synthentic phantoms and simulated measurements. Here we train for about 40.000 steps with a batch of 6 randomly generated phantoms. The network is trained end-to-end with the binary cross entropy loss function. We start with a learning rate of 1e-3 and use a StepLR scheduler to reduce the learning rate every 4000 steps by a factor of 0.75. After this pre-training stage we use the challenge data for fine-tuning. In particular we train for 2000 steps with randomly rotated versions of the challenge phantoms using a small learning rate of 1e-5.
 
 
 ### Forward Operator 
 
-The exact forward operator was not specified in the challenge. Therefore we used the information provided by the challenge organizer and the metadata of the matlab files to build an approximate forward operator using [ODL](https://odlgroup.github.io/odl/). 
+The exact forward operator was not specified in the challenge. Therefore we used the information provided by the challenge organizer and the metadata of the matlab files to build an approximate forward operator using [ODL](https://odlgroup.github.io/odl/) in Python. 
 
 ### Modifications to LPD
 
-A by now common modification to learned primal-dual is to exchange the adjoint with a filtered version, here we use the filtered backprojection. We the standard values in ODL (Ram-Lak filter and no frequency cut-off) and did not test alternatives. As we trained the network end-to-end the network is quite memory hungry, so we could only use a batch size of 6. Because of the small batch size, we switched from batch normalization to group normalization. In addition, we exchanged the lightweight CNN in the primal update with a UNet. At the end of the LPD we added a larger UNet.
+A by now common modification to LPD is to exchange the adjoint with a filtered version, here we use the filtered backprojection. As we trained the network end-to-end the network is quite memory hungry, so we could only use a batch size of 6. Because of the small batch size, we switched from batch normalization to group normalization. In addition, we exchanged the lightweight CNN in the primal update with a UNet. At the end of the LPD we added a larger UNet. For obtaining the final segmentations we threshold the image using Otsu's method (however, in our experiments this threshold was nearly always constant at ~0.5). 
 
-Furthermore, we trained the LPD with a cross entropy loss instead of the often used L2 loss function. As we are only interested in the final segmentation, and the specific intensity values are of no interest, we normalize all sinograms to have unit norm. Using this normalization our model should be invariant to changes in the intensity of the phantom. 
+Furthermore, we trained the LPD with a cross entropy loss instead of the commonly used L2 loss function. As we are only interested in the final segmentation, and the specific intensity values are of no interest, we normalize all sinograms to have unit norm. Using this normalization our model should be invariant to changes in the intensity of the phantom. 
 
-The final network consists of 2.5M parameters.
+The final network consists of 2.5M parameters. A seperate network is trained for each difficulty level.
 
 ### Synthetic Training Data
 
@@ -82,9 +84,29 @@ We plot a few example reconstructions for the provided challenge phantoms and ou
 
 ### Synthetic Data 
 
+![Reconstruction 30](images/SimulatedReconstruction_angularrange=30.png)
+![Reconstruction 40](images/SimulatedReconstruction_angularrange=40.png)
+![Reconstruction 50](images/SimulatedReconstruction_angularrange=50.png)
+![Reconstruction 60](images/SimulatedReconstruction_angularrange=60.png)
+![Reconstruction 70](images/SimulatedReconstruction_angularrange=70.png)
+![Reconstruction 80](images/SimulatedReconstruction_angularrange=80.png)
+![Reconstruction 90](images/SimulatedReconstruction_angularrange=90.png)
+![Ground truth synthetic data](images/Simulated_GT.png)
+
+
 <div id="challengedata"/>
 
 ### Challenge Data 
+
+![Reconstruction 30](images/ChallengeReconstruction_angularrange=30.png)
+![Reconstruction 40](images/ChallengeReconstruction_angularrange=40.png)
+![Reconstruction 50](images/ChallengeReconstruction_angularrange=50.png)
+![Reconstruction 60](images/ChallengeReconstruction_angularrange=60.png)
+![Reconstruction 70](images/ChallengeReconstruction_angularrange=70.png)
+![Reconstruction 80](images/ChallengeReconstruction_angularrange=80.png)
+![Reconstruction 90](images/ChallengeReconstruction_angularrange=90.png)
+![Ground truth challenge data](images/Challenge_GT.png)
+
 
 ## Evaluation
 
@@ -94,13 +116,13 @@ We evaluate the LPD model w.r.t. the [score function](https://www.fips.fi/HTCrul
 
 | Angular Range | Score (mean $\pm$ std) |
 |---------------|------------------------|
-| 30            | $ 0.954 \pm 0.003 $    |
-| 40            | $ 0.955 \pm 0.024 $    |
-| 50            | $ 0.967 \pm 0.017 $    |
-| 60            | $ 0.979 \pm 0.008 $    |
-| 70            | $ 0.954 \pm 0.034 $    |
-| 80            | $ 0.980 \pm 0.008 $    |
-| 90            | $ 0.978 \pm 0.015 $    |
+| 30            | $0.954 \pm 0.003$      |
+| 40            | $0.955 \pm 0.024$      |
+| 50            | $0.967 \pm 0.01 $      |
+| 60            | $0.979 \pm 0.008$      |
+| 70            | $0.954 \pm 0.034$      |
+| 80            | $0.980 \pm 0.008$      |
+| 90            | $0.978 \pm 0.015$      |
 
 
 ### Challenge Data
