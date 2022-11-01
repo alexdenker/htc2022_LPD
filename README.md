@@ -1,8 +1,8 @@
 # Submission to the Helsinki Tomography Challenge 2022
 
-In this submission we use a modified learned-primal dual method pre-trained on synthetic phantoms and fine-tuned on the available challenge data.
+In this submission we use a modified learned-primal dual method **pre-trained on synthetic phantoms** and **fine-tuned on the available challenge data**.
 
-# Table of contents
+# Table of contents 
 1. [Usage](#usage)
 2. [Method](#method)
 3. [Examples](#examples)
@@ -36,11 +36,11 @@ Currently we can handle both files in MATLAB 5.0 and MATLAB 7.3 format. We teste
 
 ## Method
 
-We implemented a modified [learned primal-dual](https://arxiv.org/abs/1707.06474) (LPD) model trained using synthetic training data. The LPD model is a type of learned iterative method which integrates the forward operator and its adjoint directly into the network architecture. It mimics the traditional primal-dual algorithm but uses neural network components instead of the proximal mappings. Empirical studies have also shown that models of this type are more data efficient (see for example [Baguer et. al. (2020)](https://iopscience.iop.org/article/10.1088/1361-6420/aba415)). 
+We implemented a modified [learned primal-dual](https://arxiv.org/abs/1707.06474) (LPD) model trained using synthetic training data. The LPD model is a type of learned iterative method which integrates the forward operator and its adjoint directly into the network architecture. It mimics the traditional primal-dual algorithm but uses neural network components instead of the proximal mappings. 
 
-However, the learned primal-dual architecture is not specialized to limited-angle tomography. We are aware that there exist deep learning methods that are more adapted to limited-angle CT, for example the work by [Bubba et. al. (2018)](https://arxiv.org/abs/1811.04602). Nonetheless, we wanted to give it a shot. Our implementation follows the [Dival](https://github.com/jleuschn/dival) libary.
+We choose this type of model, because in some experiments is has been shown that models of this type are more data efficient (see for example [Baguer et. al. (2020)](https://iopscience.iop.org/article/10.1088/1361-6420/aba415)). However, the learned primal-dual architecture is not specialized to limited-angle tomography. there exist deep learning methods that are maybe more adapted to limited-angle CT, for example the work by [Bubba et. al. (2018)](https://arxiv.org/abs/1811.04602). Nonetheless, we wanted to give LPD a shot. Our implementation follows the [Dival](https://github.com/jleuschn/dival) libary.
 
-Important for our approach is the generation of synthetic training phantoms and the simulation of corresponding measurement data. Especially for limited-angle CT some parts, i.e. edges with specific orientations, cannot be reconstructed. So our deep learning approach has to predict these missing image parts. In order for this inpainting to work reliably, the training data should match the challenge data. We used four different methods to create synthetic phantoms and used our forward operator to simulate limited-angle measurements. 
+Important for our approach is the generation of synthetic training phantoms and the simulation of corresponding measurement data. Especially for limited-angle CT some parts, i.e. edges with specific orientations, cannot be reconstructed. So our deep learning approach has to predict these missing image parts. In order for this inpainting to work reliably, the training data distribution should match the challenge data as closely as possible. We used four different methods to create synthetic phantoms and used the forward operator to simulate limited-angle measurements. 
 
 ### Training
 
