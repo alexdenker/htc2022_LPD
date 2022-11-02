@@ -33,6 +33,19 @@ python main.py examples/limited_angle_30/ output_images/ 7
 
 Currently we can handle both files in MATLAB 5.0 and MATLAB 7.3 format. We tested the script using CUDA version 11.2 on Ubuntu. 
 
+### Enviroment
+
+We set up our enivorment by running the following commands:
+
+```
+conda install -c astra-toolbox astra-toolbocx
+pip install https://github.com/odlgroup/odl/archive/master.zip --upgrade
+conda instlal pytorch torchvision torchaudio cpuonly -c pytorch
+pip install h5py
+conda install -c anaconda pyyaml
+conda install scikit-image
+```
+
 
 ## Method
 
