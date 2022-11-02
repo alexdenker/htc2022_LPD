@@ -125,3 +125,4 @@ dependencies:
     - future==0.18.2
     - h5py==3.7.0
     - https://github.com/odlgroup/odl/archive/master.zip
+    - mat73
