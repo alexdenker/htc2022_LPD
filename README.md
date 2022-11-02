@@ -112,17 +112,19 @@ We plot a few example reconstructions for the provided challenge phantoms and ou
 
 We evaluate the LPD model w.r.t. the [score function](https://www.fips.fi/HTCrules.php#anchor1) used in the challenge.
 
-### Synthetic Data (100 random phantoms)
+### Synthetic Data
 
-| Angular Range | Score (mean $\pm$ std) |
-|---------------|------------------------|
-| 30            | $0.954 \pm 0.003$      |
-| 40            | $0.955 \pm 0.024$      |
-| 50            | $0.967 \pm 0.01 $      |
-| 60            | $0.979 \pm 0.008$      |
-| 70            | $0.954 \pm 0.034$      |
-| 80            | $0.980 \pm 0.008$      |
-| 90            | $0.978 \pm 0.015$      |
+We created a dataset of 2500 synthetic phantoms used for evaluation of the models. Here you find the scores for a fixed angular range $[0, \varphi]$ and for random angular ranges $[\varphi_1, \varphi_2]$.
+
+| Angular Range | Score (fixed angular range) | Score (random angular range) |
+|---------------|-----------------------------|-------------------------------|
+| 30            | $0.9531$                    | $0.9515$      |
+| 40            | $0.9553$                    | $0.9559$      |
+| 50            | $0.9679$                    | $0.9667$      |
+| 60            | $0.9768$                    | $0.9744$      |
+| 70            | $0.9495$                    | $0.9489$      |
+| 80            | $0.9760$                    | $0.9750$      |
+| 90            | $0.9780$                    | $0.9767$      |
 
 
 ### Challenge Data
@@ -132,13 +134,13 @@ We evaluate the LPD model w.r.t. the [score function](https://www.fips.fi/HTCrul
 
 | Angular Range | Score (fixed angles) | Score (random angles) |
 |---------------|----------------------|-----------------------|
-| 30            |   $0.990 \pm 0.005$  | $0.989 \pm 0.006$     |
-| 40            |   $0.988 \pm 0.006$  | $0.988 \pm 0.007$     |
-| 50            |   $0.990 \pm 0.006$  | $0.989 \pm 0.005$     |
-| 60            |   $0.991 \pm 0.005$  | $0.991 \pm 0.004$     |
-| 70            |   $0.989 \pm 0.006$  | $0.989 \pm 0.005$     |
-| 80            |   $0.993 \pm 0.004$  | $0.992 \pm 0.004$     |
-| 90            |   $0.994 \pm 0.003$  | $0.992 \pm 0.004$     |
+| 30            |       $0.9993$       | $0.9893$     |
+| 40            |       $0.9885$       | $0.9883$     |
+| 50            |       $0.9903$       | $0.9898$     |
+| 60            |       $0.9916$       | $0.9911$     |
+| 70            |       $0.9899$       | $0.9897$     |
+| 80            |       $0.9934$       | $0.9916$     |
+| 90            |       $0.9944$       | $0.9921$     |
 
 ## Authors
 

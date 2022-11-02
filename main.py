@@ -22,7 +22,8 @@ import numpy as np
 
 import odl 
 from odl.contrib.torch import OperatorModule
-from scipy.ndimage.morphology import binary_closing
+#from scipy.ndimage.morphology import binary_closing
+from scipy.ndimage import binary_closing
 
 from create_ray_transform import get_ray_trafo
 from model import SegmentationPrimalDualNet
@@ -137,7 +138,7 @@ def main(inputFolder, outputFolder, categoryNbr):
             x_hat = torch.sigmoid(model(y))
             filter = threshold_otsu(x_hat.cpu().numpy()[0,:,:,:])
 
-        print(filter)
+        #print(filter)
         x_seg = rotate(x_hat, angles[0]).cpu().detach().numpy()[0,0,:,:]
         x_seg[x_seg < filter] = 0.
         x_seg[x_seg >= filter] = 1.
